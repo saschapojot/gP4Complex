@@ -166,5 +166,8 @@ def computeOneSolutionWith5AdjacentPairs(inData):
         """
     n, g, Eest = inData
     Eest*=(1+0.1j)
-    E=mpmath.findroot(lambda EVal:eqnFiveAdjacentPairs(EVal,n,g),Eest,solver="muller")
-    return [n, g, E]
+    try:
+        E=mpmath.findroot(lambda EVal:eqnFiveAdjacentPairs(EVal,n,g),Eest,solver="muller",tol=1e-6,maxsteps=100)
+        return [n, g, E]
+    except ValueError:
+        return []
