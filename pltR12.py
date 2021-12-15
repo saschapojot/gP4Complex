@@ -27,8 +27,8 @@ ax.set_title("Eigenvalues for potential $V(x)=\lambda x^{2}-ix^{5}$")
 
 
 sctShooting=ax.scatter(gShooting,EShooting,color="blue",marker=".",s=40,label="Shooting")
-sctAdjRe=ax.scatter(gAdj,EReAdj,color="fuchsia",marker="+",s=50,label="WKB adj real")
-sctAdjIm=ax.scatter(gAdj,EImAdj,color="green",marker="^",s=50,label="WKB adj imag")
+# sctAdjRe=ax.scatter(gAdj,EReAdj,color="fuchsia",marker="+",s=50,label="WKB adj real")
+# sctAdjIm=ax.scatter(gAdj,EImAdj,color="green",marker="^",s=50,label="WKB adj imag")
 
 ax.hlines(y=0, xmin=1e-4, xmax=10, color='r')
 plt.legend()

@@ -9,7 +9,7 @@ gShooting=shootingDf["g"]
 EShooting=shootingDf["E"]
 ##############load adj data frames
 levelFirst=0
-levelLast=5
+levelLast=7
 # adjDfList=[]
 gAdjAll=[]
 EReAdjAll=[]

@@ -1,10 +1,10 @@
-import scipy.optimize as sopt
 import matplotlib.pyplot as plt
 from datetime import datetime
 from multiprocessing import Pool
 import scipy.special as sspecial
 import mpmath
 from mpmath import mp
+import numpy as np
 mp.dps=30
 
 #this script computes potential 4 V=x^{2}-igx^{5}, region I-II
@@ -124,20 +124,23 @@ def eqnFiveAdjacentPairs(EIn,n,g):
     retValsCisAnother = []  # in the order x2, x1, another branch
     retValsTransAnother = []  # in the order x1, x2, another branch
 
+    ###############################
     # fill cis
-    for pairTmp in adjPairsAll:
-        x2Tmp, x1Tmp = pairTmp
-        intValTmp = integralQuadrature(g, E, x1Tmp, x2Tmp)
-        rstTmp = intValTmp - (n + 1 / 2) * mp.pi
-        retValsCis.append(rstTmp)
-    # fill trans
-    for pairTmp in adjPairsAll:
-        x2Tmp, x1Tmp = pairTmp
-        intValTmp = integralQuadrature(g, E, x2Tmp, x1Tmp)
-        rstTmp = intValTmp - (n + 1 / 2) * mp.pi
-        retValsTrans.append(rstTmp)
 
-    # #fill cis another
+    # for pairTmp in adjPairsAll:
+    #     x2Tmp, x1Tmp = pairTmp
+    #     intValTmp = integralQuadrature(g, E, x1Tmp, x2Tmp)
+    #     rstTmp = intValTmp - (n + 1 / 2) * mp.pi
+    #     retValsCis.append(rstTmp)
+    # # fill trans
+    # for pairTmp in adjPairsAll:
+    #     x2Tmp, x1Tmp = pairTmp
+    #     intValTmp = integralQuadrature(g, E, x2Tmp, x1Tmp)
+    #     rstTmp = intValTmp - (n + 1 / 2) * mp.pi
+    #     retValsTrans.append(rstTmp)
+    ########################################
+    ########################################
+    # # #fill cis another
     for pairTmp in adjPairsAll:
         x2Tmp, x1Tmp = pairTmp
         intValTmp = integralQuadratureAnotherBranch(g, E, x1Tmp, x2Tmp)
@@ -150,7 +153,7 @@ def eqnFiveAdjacentPairs(EIn,n,g):
         intValTmp = integralQuadratureAnotherBranch(g, E, x2Tmp, x1Tmp)
         rstTmp = intValTmp - (n + 1 / 2) * mp.pi
         retValsTransAnother.append(rstTmp)
-
+    #################################################
     retCombined = retValsCis + retValsTrans + retValsCisAnother + retValsTransAnother
     retSorted = sorted(retCombined, key=mpmath.fabs)
     root0 = retSorted[0]
@@ -165,9 +168,82 @@ def computeOneSolutionWith5AdjacentPairs(inData):
         :return: [n, g, E]
         """
     n, g, Eest = inData
-    Eest*=(1+0.1j)
+    Eest*=(1+0j)
     try:
-        E=mpmath.findroot(lambda EVal:eqnFiveAdjacentPairs(EVal,n,g),Eest,solver="muller",tol=1e-6,maxsteps=100)
+        E=mpmath.findroot(lambda EVal:eqnFiveAdjacentPairs(EVal,n,g),Eest,solver="muller",maxsteps=100,tol=1e-10)
         return [n, g, E]
-    except ValueError:
+    except ValueError as e:
+        # print("error message:"+str(e))
+        return []
+
+
+def vecEqnFiveAdjacentPairs(ERe,EIm,n,g):
+    """
+
+    :param ERe:
+    :param EIm:
+    :param n:
+    :param g:
+    :return:
+    """
+    E=ERe+1j*EIm
+    adjPairsAll = ret5AdjacentPairs(g, E)
+    retValsCis = []  # in the order x2, x1
+    retValsTrans = []  # in the order x1,x2
+    retValsCisAnother = []  # in the order x2, x1, another branch
+    retValsTransAnother = []  # in the order x1, x2, another branch
+
+    ###############################
+    # fill cis
+
+    for pairTmp in adjPairsAll:
+        x2Tmp, x1Tmp = pairTmp
+        intValTmp = integralQuadrature(g, E, x1Tmp, x2Tmp)
+        rstTmp = intValTmp - (n + 1 / 2) * mp.pi
+        retValsCis.append(rstTmp)
+    # fill trans
+    for pairTmp in adjPairsAll:
+        x2Tmp, x1Tmp = pairTmp
+        intValTmp = integralQuadrature(g, E, x2Tmp, x1Tmp)
+        rstTmp = intValTmp - (n + 1 / 2) * mp.pi
+        retValsTrans.append(rstTmp)
+    ########################################
+    ########################################
+    # # #fill cis another
+    # for pairTmp in adjPairsAll:
+    #     x2Tmp, x1Tmp = pairTmp
+    #     intValTmp = integralQuadratureAnotherBranch(g, E, x1Tmp, x2Tmp)
+    #     rstTmp = intValTmp - (n + 1 / 2) * mp.pi
+    #     retValsCisAnother.append(rstTmp)
+    #
+    # # #fill trans another
+    # for pairTmp in adjPairsAll:
+    #     x2Tmp, x1Tmp = pairTmp
+    #     intValTmp = integralQuadratureAnotherBranch(g, E, x2Tmp, x1Tmp)
+    #     rstTmp = intValTmp - (n + 1 / 2) * mp.pi
+    #     retValsTransAnother.append(rstTmp)
+    #################################################
+    retCombined = retValsCis + retValsTrans + retValsCisAnother + retValsTransAnother
+    retSorted = sorted(retCombined, key=mpmath.fabs)
+    root0 = retSorted[0]
+    return np.real(root0),np.imag(root0)
+
+
+def vecComputeOneSolutionWith5AdjacentPairs(inData):
+    """
+
+    :param inData: [n, g, Eest]
+    :return: [n,g,E]
+    """
+    n, g, Eest = inData
+    EReEst=np.real(Eest)
+    EImEst=np.imag(Eest)
+    func=lambda ERe, EIm: vecEqnFiveAdjacentPairs(ERe,EIm,n,g)
+    try:
+        EReVal,EImVal=mpmath.findroot(func,(EReEst,EImEst),solver="halley",maxsteps=100,tol=1e-10)
+
+        E=EReVal+1j*EImVal
+        return [n,g,E]
+    except ValueError as e:
+        # print("error message:"+str(e))
         return []

@@ -8,8 +8,8 @@ shootingDf=pd.read_csv(prefix+"shootingR12.csv")
 gShooting=shootingDf["g"]
 EShooting=shootingDf["E"]
 ##############load adj data frames
-level1=3
-level2=4
+level1=6
+level2=7
 gAdjAll=[]
 EReAdjAll=[]
 levelsAll=[level1,level2]
